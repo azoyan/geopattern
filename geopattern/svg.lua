@@ -41,15 +41,34 @@ function Svg:toString()
     return table.concat({self:header(), self.svg_string, self:closer()}, '')
 end
 
+local function formattingSymbolAndNumber(number)
+    if type(number) == "number" then
+        return {
+            symbol = "%0.16f",
+            value = number
+        }
+    else
+        return {
+            symbol = "%s",
+            value = number
+        }
+    end
+end
+
 function Svg:rect(x, y, width, height, args)
-    local str = string.format('<rect x="%d" y="%d" width="%s" height="%s" %s/>', x, y, width, height,
-                    self:write_args(args))
+    local width = formattingSymbolAndNumber(width)
+    local height = formattingSymbolAndNumber(height)
+    local template = '<rect x="%f" y="%f" width="' .. width.symbol .. '" height="' .. height.symbol .. '" %s/>'
+    local str = template:format(x, y, width.value, height.value, self:write_args(args))
     self.svg_string = self.svg_string .. str
 end
 
 function Svg:circle(x, y, radius, args)
-    local str = string.format('<circle cx="%d" cy="%d" r="%d" %s/>', x, y, radius, self:write_args(args))
+    local radius = formattingSymbolAndNumber(radius)
+    local template = '<circle cx="%f" cy="%f" r="' .. radius.symbol .. '" %s/>'
+    local str = template:format(x, y, radius.value, self:write_args(args))
     self.svg_string = self.svg_string .. str
+
 end
 
 function Svg:path(str, args)
