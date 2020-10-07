@@ -3,7 +3,7 @@ local Svg = require "geopattern.svg"
 local base64 = require "geopattern.base64"
 local sha1 = require "geopattern.sha1.init"
 
-local PATTERNS = {'octogons', 'overlappingCircles', 'plusSigns', 'xes', 'sineWaves', 'hexagons', 'overlappingRings',
+GeoPattern.patterns = {'octogons', 'overlappingCircles', 'plusSigns', 'xes', 'sineWaves', 'hexagons', 'overlappingRings',
                   'plaid', 'triangles', 'squares', 'concentricCircles', 'diamonds', 'tessellation', 'nestedSquares',
                   'mosaicSquares', 'chevrons'}
 
@@ -177,9 +177,15 @@ function GeoPattern:new(str, options)
     }
 
     if options then
-        if options.generator then self.opts.generator = options.generator end
-        if options.color then self.opts.color = options.color end
-        if options.baseColor then self.opts.baseColor = options.baseColor end        
+        if options.generator then
+            self.opts.generator = options.generator
+        end
+        if options.color then
+            self.opts.color = options.color
+        end
+        if options.baseColor then
+            self.opts.baseColor = options.baseColor
+        end
     end
 
     self.hash = sha1.sha1(str)
@@ -215,7 +221,8 @@ function GeoPattern:generateBackground()
 
     self.color = rgb
     self.svg:rect(0, 0, '100%', '100%', {
-        fill = string.format('rgb(%d, %d, %d)', rgb[1] * 255, rgb[2] * 255, rgb[3] * 255)
+        fill = string.format('rgb(%d, %d, %d)', math.floor(rgb[1] * 255), math.floor(rgb[2] * 255),
+            math.floor(rgb[3] * 255))
     })
 end
 
@@ -244,14 +251,14 @@ function GeoPattern:generatePattern()
     local generator = self.opts.generator
 
     if generator then
-        if table.indexOf(PATTERNS, generator) < 0 then
+        if table.indexOf(self.patterns, generator) < 0 then
             error("Generator doesn't exist", 1)
         end
     else
-        local index = hexVal(self.hash, 20) % #PATTERNS + 1
-        generator = PATTERNS[index]
+        local index = hexVal(self.hash, 20) % #self.patterns + 1
+        generator = self.patterns[index]
     end
-    
+
     return self[generator](self);
 end
 
@@ -698,7 +705,7 @@ end
 local function buildChevronShape(width, height)
     local e = height * 0.66
     return string.format(
-               '<polyline point="%f, %f, %f, %f, %f, %f, %f, %f, %f, %f"></polyline><polyline point="%f, %f, %f, %f, %f, %f, %f, %f, %f, %f"></polyline>',
+               '<polyline points="%f, %f, %f, %f, %f, %f, %f, %f, %f, %f"></polyline><polyline points="%f, %f, %f, %f, %f, %f, %f, %f, %f, %f"></polyline>',
                0, 0, width / 2, height - e, width / 2, height, 0, e, 0, 0, width / 2, height - e, width, 0, width, e,
                width / 2, height, width / 2, height - e)
 end
